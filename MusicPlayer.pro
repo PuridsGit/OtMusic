@@ -11,10 +11,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    configdialog.cpp
+    configdialog.cpp \
+    scanner.cpp
 
 HEADERS  += mainwindow.h \
-    configdialog.h
+    configdialog.h \
+    scanner.h
 
 FORMS    += mainwindow.ui \
     configdialog.ui
@@ -22,3 +24,8 @@ FORMS    += mainwindow.ui \
 
 
 
+
+unix:!macx|win32: LIBS += -L$$PWD/'../../../Program Files (x86)/taglib/lib/' -ltag
+
+INCLUDEPATH += $$PWD/'../../../Program Files (x86)/taglib/include'
+DEPENDPATH += $$PWD/'../../../Program Files (x86)/taglib/include'

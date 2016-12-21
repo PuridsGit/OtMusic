@@ -1,38 +1,11 @@
 #include "configdialog.h"
+#include "scanner.h"
 #include "ui_configdialog.h"
 
-#include <iostream>
-#include <fstream>
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-
 #include <QtSql>
-
+#include <QThread>
+#include <QMessageBox>
 #include <QFileDialog>
-#include <QDir>
-#include <QLibrary>
-//#include "lib/id3.h"
-
-
-
-
-
-using namespace std;
-
-typedef struct{
-    char tag[3];
-    char title[30];
-    char artist[30];
-    char album[30];
-    char year[4];
-    char comment[40];
-    unsigned long genre;
-}mp3Tag;
-
-
 
 configdialog::configdialog(QWidget *parent) :
     QDialog(parent),
@@ -41,8 +14,8 @@ configdialog::configdialog(QWidget *parent) :
     ui->setupUi(this);
 
     //connect
-    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(on_buttonBox_accepted());
-    connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(on_buttonBox_rejected());
+    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(on_buttonBox_accepted()));
+    connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(on_buttonBox_rejected()));
 
 
 
@@ -53,8 +26,6 @@ configdialog::configdialog(QWidget *parent) :
 
 
     ui->lineEdit->setText(querry.value(0).toString());
-
-
 
 }
 
@@ -70,102 +41,66 @@ void configdialog::on_pushButton_chooseDir_clicked()
     dialog.setFileMode(QFileDialog::Directory);
     dialog.setOption(QFileDialog::ShowDirsOnly);
     if(dialog.exec())
-    directorypath = dialog.selectedFiles().value(0);
-
-
-    qDebug() << directorypath;
-    ui->lineEdit->setText(directorypath);
-
-    QSqlQuery querry;
-    querry.prepare("insert or replace into Dir(Dir ,id) " "values(:dir, (select id from dir where id = 1))");
-    querry.bindValue(":dir",directorypath);
-
-    if(!querry.exec())
     {
-        qDebug() << querry.lastError().text();
-    }
+        QString directorypath = dialog.selectedFiles().value(0);
 
-}
+        qDebug() << directorypath;
+        ui->lineEdit->setText(directorypath);
 
-//scaned ausgewaehlten ordner nach .mp3
-void configdialog::on_pushButton_add_rescan_clicked()
-{
-    //dir aus Datenbank
+        QSqlQuery querry;
+        querry.prepare("insert or replace into Dir(Dir ,id) " "values(:dir, (select id from dir where id = 1))");
+        querry.bindValue(":dir",directorypath);
 
-    QSqlQuery q;
-    QString chosendir;
-    QStringList mp3;
-    QStringList files;
-    int counter = 0;
-    q.prepare("select Dir from Dir where id =1");
-    q.exec();
-    q.next();
-
-    chosendir = q.value(0).toString();
-
-    QDirIterator it(chosendir, mp3 << "*.mp3", QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-    while(it.hasNext())
-    {
-        files << it.next();
-
-        counter++;
-    }
-
-    for(int i = 0; i < counter; ++i)
-    {
-       gettagsandadd(files.at(i),i);
-    }
-
-}
-
-//holt MEtadaten und schreibt des ganze in die Datenbank
-void configdialog::gettagsandadd(QString Filelink, int i)
-{
-
-
-    std::string thisfile = Filelink.toUtf8().constData();
-    mp3Tag tag;
-    char achar[128] = {0};
-
-    const char * c = thisfile.c_str();
-    ifstream File;
-    File.open(c, ios::binary);
-
-    File.seekg(-128, ios::end);
-    //File.read(reinterpret_cast<char *>(&tag), 128);
-    File.read(achar, 128);
-    File.close();
-
-    memcpy(tag.tag, achar, 3);
-    memcpy(tag.title, achar + 3, 30);
-    memcpy(tag.artist, achar + 33, 30);
-    memcpy(tag.album, achar + 63, 30);
-
-
-    QString stitle = QString::fromUtf8(tag.title);
-    QString sartist = QString::fromUtf8(tag.artist);
-    QString salbum = QString::fromUtf8(tag.album);
-
-
-
-
-        QSqlQuery q;
-
-        q.prepare("insert or replace into Music(FID, URL, TITLE, ARTIST, ALBUM) values(:FID, :URL, :TITLE, :ARTIST, :ALBUM)");
-        q.bindValue(":FID", i+1);
-        q.bindValue(":URL", Filelink);
-        q.bindValue(":TITLE", stitle);
-        q.bindValue(":ARTIST", sartist);
-        q.bindValue(":ALBUM", salbum);
-        if(!q.exec())
+        if(!querry.exec())
         {
-            qDebug() << q.lastError().text();
+            qDebug() << querry.lastError().text();
         }
+    }
 
 
+}
 
 
+//thread scan load
+configdialog::on_pushButton_add_rescan_clicked()
+{
+    if(ui->lineEdit->text().length() > 0)
+    {
+        QThread scanThread = new QThread();
+        scanner scanObject = new scanner();
 
+        scanObject.moveToThread(&scanThread);
+        connect(scanThread, &QThread::started, scanObject, scanner::doWork());
+        connect(scanThrad, &QThread::finished, scanThread, QObject::deleteLater());
+        connect(scanThrad, &QThread::finished, scanObject, QObject::deleteLater());
+        connect(scanThread, &scanner::updateProgressbar, configdialog::on_progressBarupdate);
+        connect(scanThread, &scanner::switchProgressbar, configdialog::on_switchProgressbar);
+
+        scanThread.start();
+    }
+    else
+    {
+        QMessageBox messageBox;
+        messageBox.setText("No directory chosen");
+        messageBox.exec();
+    }
+}
+
+void configdialog::on_progressBarupdate(int i)
+{
+    ui->progressBar->setValue(i);
+}
+
+void configdialog::on_switchProgressbar()
+{
+    if(ui->progressBar->enabled())
+    {
+        ui->progressBar->setEnabled(false);
+    }
+    else
+    {
+        ui->progressBar->setEnabled(true);
+    }
 }
 
 

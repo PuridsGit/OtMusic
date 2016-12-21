@@ -19,7 +19,8 @@ public:
 
 private slots:
 
-
+    void on_progressBarupdate(int i);
+    void on_switchProgressbar();
     void on_pushButton_chooseDir_clicked();
 
     void on_pushButton_add_rescan_clicked();
@@ -31,8 +32,6 @@ private slots:
 
 private:
     Ui::configdialog *ui;
-
-    QString directorypath;
 
     void gettagsandadd(QString Filelink, int i);
 
