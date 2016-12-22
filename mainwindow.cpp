@@ -92,9 +92,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QString query =  "select distinct Artist from Music";
 
-    qDebug() << aQString;
+    qDebug() << query;
 
-    QStringList artistList = preparePlaylistURL(query);
+    QStringList artistList = querytoStringlist(query);
 
     for(int i = 0; i < artistList.size(); i++)
     {
@@ -117,10 +117,17 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->listWidget_playlist, SIGNAL(itemClicked(QListWidgetItem*)),this ,SLOT(on_listWidget_playlist_itemClicked(QListWidgetItem*)));
 
     //connect Qlistwidget double clicks
-    connect(ui->listWidget_artist, QListWidget::doubleClicked, this, MainWindow::on_listWidget_artist_itemDoubleClicked);
-    connect(ui->listWidget_Album, QListWidget::doubleClicked, this, MainWindow::on_listWidget_album_itemDoubleClicked);
-    connect(ui->listWidget_title, QListWidget::doubleClicked, this, MainWindow::on_listWidget_title_itemDoubleClicked);
-    connect(ui->listWidget_playlist, QListWidget::doubleClicked, this, MainWindow::on_listWidget_playlist_itemDoubleClicked);
+
+    connect(ui->listWidget_artist, &QListWidget::itemDoubleClicked, this, &MainWindow::on_listWidget_artist_itemDoubleClicked);
+    connect(ui->listWidget_Album, &QListWidget::itemDoubleClicked, this, &MainWindow::on_listWidget_album_itemDoubleClicked);
+    connect(ui->listWidget_title, &QListWidget::itemDoubleClicked, this, &MainWindow::on_listWidget_title_itemDoubleClicked);
+    connect(ui->listWidget_playlist, &QListWidget::itemDoubleClicked, this, &MainWindow::on_listWidget_playlist_itemDoubleClicked);
+
+//    connect(ui->listWidget_artist, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(on_listWidget_artist_itemDoubleClicked(QListWidgetItem*)));
+//    connect(ui->listWidget_Album, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(on_listWidget_Album_itemClicked(QListWidgetItem*)));
+//    connect(ui->listWidget_title, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(on_listWidget_title_itemDoubleClicked(QListWidgetItem*)));
+//    connect(ui->listWidget_playlist, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(on_listWidget_playlist_itemDoubleClicked(QListWidgetItem*)));
+
 
 }
 
@@ -156,14 +163,18 @@ QStringList MainWindow::querytoStringlist(QString query)
 //adds the data to the playlist
 void MainWindow::addtoPlaylist(QStringList titles, QStringList URLs)
 {
-    URLslength = URLs.length();
+    int URLslength = URLs.length();
+    QString URL;
     for(int i = 0; i < URLslength; i++)
     {
-        URLs.at(i).replace("/","\\\\");
+        URL = URLs.at(i);
+        URL.replace("/","\\\\");
+        URLs.replace(i, URL);
         playlist->addMedia(QUrl::fromLocalFile(URLs.at(i)));
     }
 
     ui->listWidget_playlist->addItems(titles);
+    playlist->setCurrentIndex(0);
 }
 
 
@@ -221,27 +232,30 @@ void MainWindow::on_ActionOptionenTriggered()
     cfg.exec();
 }
 
+//single clicked slots
+//to show correct items in coresponding qlistwidget
 
-
+//when artist qlistwidget is clicked - adds items to album qlistwidget
 void MainWindow::on_listWidget_artist_itemClicked(QListWidgetItem *item)
 {
     QString itemString = "select distinct ALBUM from Music where ARTIST = '" + item->text() + "'";
     qDebug() << itemString;
 
 
-    QStringList alist = preparePlaylistURL(itemString);
+    QStringList alist = querytoStringlist(itemString);
 
     ui->listWidget_Album->clear();
 
     ui->listWidget_Album->addItems(alist);
 }
 
+//when album qlistwidget is clicked - adds items to title qlistwidget
 void MainWindow::on_listWidget_Album_itemClicked(QListWidgetItem *item)
 {
     QString itemString = "select TITLE from Music where ALBUM ='" + item->text() + "'";
     qDebug() << itemString;
 
-    QStringList alist = preparePlaylistURL(itemString);
+    QStringList alist = querytoStringlist(itemString);
 
     ui->listWidget_title->clear();
 
@@ -249,15 +263,15 @@ void MainWindow::on_listWidget_Album_itemClicked(QListWidgetItem *item)
 
 }
 
-//zur playlist hinzufuegen
 //double clicked slots
+//add items to playlist
 
 //double clicked listwidget title
 void MainWindow::on_listWidget_title_itemDoubleClicked(QListWidgetItem *item)
 {
     QString query ="select URL from Music where TITLE = '" +item->text()+ "'";
     QStringList urls = querytoStringlist(query);
-    QStringList titles = titles.append(item->text());
+    QStringList titles = titles << item->text();
 
     addtoPlaylist(titles, urls);
 

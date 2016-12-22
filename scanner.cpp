@@ -10,7 +10,7 @@ scanner::scanner(QObject *parent) : QObject(parent)
 }
 
 //scan chosen dir with Qdiriterator
-scanner::doWork()
+void scanner::doWork()
 {
     //dir aus Datenbank
 
@@ -43,10 +43,9 @@ scanner::doWork()
 }
 
 //add files to database
-scanner::gettagsandadd(QStringList files)
+void scanner::gettagsandadd(QStringList files)
 {
     int length = files.length();
-    TagLib::FileRef fileRef;
 
     //progressbar variables
     int progressbarCurrent = 45;
@@ -58,19 +57,24 @@ scanner::gettagsandadd(QStringList files)
     {
         if(files.at(i).endsWith("mp3") || files.at(i).endsWith("wav") || files.at(i).endsWith("flac"))
         {
-            fileRef(files.at(i));
-            QString title = fileRef.tag()->title();
-            QString artist = fileRef.tag()->artist();
-            QString album = fileRef.tag()->album();
+            TagLib::FileRef fileRef(files.at(i).toStdString().data());
+            QString Title = fileRef.tag()->title().toCString();
+            QString Artist = fileRef.tag()->artist().toCString();
+            QString Album = fileRef.tag()->album().toCString();
+
+//            QString qTitle = QString::from;
+//            QString qArtist = QString::fromCString(artist);
+//            QString qAlbum = QString::fromCString(album);
+
 
             QSqlQuery q;
 
             q.prepare("insert or replace into Music(FID, URL, TITLE, ARTIST, ALBUM) values(:FID, :URL, :TITLE, :ARTIST, :ALBUM)");
             q.bindValue(":FID", i);
             q.bindValue(":URL", files.at(i));
-            q.bindValue(":TITLE", title);
-            q.bindValue(":ARTIST", artist);
-            q.bindValue(":ALBUM", album);
+            q.bindValue(":TITLE", Title);
+            q.bindValue(":ARTIST", Artist);
+            q.bindValue(":ALBUM", Album);
             if(!q.exec())
             {
                 qDebug() << q.lastError().text();

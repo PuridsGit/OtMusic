@@ -12,6 +12,7 @@ configdialog::configdialog(QWidget *parent) :
     ui(new Ui::configdialog)
 {
     ui->setupUi(this);
+    ui->progressBar->setVisible(false);
 
     //connect
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(on_buttonBox_accepted()));
@@ -62,21 +63,21 @@ void configdialog::on_pushButton_chooseDir_clicked()
 
 
 //thread scan load
-configdialog::on_pushButton_add_rescan_clicked()
+void configdialog::on_pushButton_add_rescan_clicked()
 {
     if(ui->lineEdit->text().length() > 0)
     {
-        QThread scanThread = new QThread();
-        scanner scanObject = new scanner();
+        QThread* scanThread = new QThread(this);
+        scanner* scanObject = new scanner(this);
 
-        scanObject.moveToThread(&scanThread);
-        connect(scanThread, &QThread::started, scanObject, scanner::doWork());
-        connect(scanThrad, &QThread::finished, scanThread, QObject::deleteLater());
-        connect(scanThrad, &QThread::finished, scanObject, QObject::deleteLater());
-        connect(scanThread, &scanner::updateProgressbar, configdialog::on_progressBarupdate);
-        connect(scanThread, &scanner::switchProgressbar, configdialog::on_switchProgressbar);
+        scanObject->moveToThread(scanThread);
+        connect(scanThread, &QThread::started, scanObject, &scanner::doWork);
+        connect(scanThread, &QThread::finished, scanThread, &QObject::deleteLater);
+        connect(scanThread, &QThread::finished, scanObject, &QObject::deleteLater);
+        connect(scanObject, &scanner::updateProgressbar, this, &configdialog::on_progressBarupdate);
+        connect(scanObject, &scanner::switchProgressbar, this, &configdialog::on_switchProgressbar);
 
-        scanThread.start();
+        scanThread->start();
     }
     else
     {
@@ -93,13 +94,13 @@ void configdialog::on_progressBarupdate(int i)
 
 void configdialog::on_switchProgressbar()
 {
-    if(ui->progressBar->enabled())
+    if(ui->progressBar->isVisible())
     {
-        ui->progressBar->setEnabled(false);
+        ui->progressBar->setVisible(false);
     }
     else
     {
-        ui->progressBar->setEnabled(true);
+        ui->progressBar->setVisible(true);
     }
 }
 

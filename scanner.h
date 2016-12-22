@@ -10,10 +10,9 @@ public:
     explicit scanner(QObject *parent = 0);
 
 private:
-    gettagsandadd(QStringList files);
+    void gettagsandadd(QStringList files);
 
 signals:
-    void done();
     void updateProgressbar(int i);
     void switchProgressbar();
 

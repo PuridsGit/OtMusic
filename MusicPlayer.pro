@@ -23,9 +23,10 @@ FORMS    += mainwindow.ui \
 
 
 
-
-
 unix:!macx|win32: LIBS += -L$$PWD/'../../../Program Files (x86)/taglib/lib/' -ltag
 
 INCLUDEPATH += $$PWD/'../../../Program Files (x86)/taglib/include'
 DEPENDPATH += $$PWD/'../../../Program Files (x86)/taglib/include'
+
+win32:!win32-g++: PRE_TARGETDEPS += $$PWD/'../../../Program Files (x86)/taglib/lib/tag.lib'
+else:unix:!macx|win32-g++: PRE_TARGETDEPS += $$PWD/'../../../Program Files (x86)/taglib/lib/libtag.a'
