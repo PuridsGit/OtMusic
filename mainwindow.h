@@ -39,7 +39,6 @@ private slots:
 
     void on_listWidget_artist_itemClicked(QListWidgetItem *item);
     void on_listWidget_Album_itemClicked(QListWidgetItem *item);
-    void on_listWidget_title_itemClicked(QListWidgetItem *item);
 
     void on_listWidget_artist_itemDoubleClicked(QListWidgetItem *item);
     void on_listWidget_album_itemDoubleClicked(QListWidgetItem *item);
