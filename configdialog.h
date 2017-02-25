@@ -3,6 +3,11 @@
 
 #include <QDialog>
 
+#include <QtSql>
+#include <QThread>
+#include <QMessageBox>
+#include <QFileDialog>
+
 namespace Ui {
 class configdialog;
 }

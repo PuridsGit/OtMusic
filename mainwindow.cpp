@@ -3,23 +3,6 @@
 #include "configdialog.h"
 #include "about.h"
 
-#include <QMessageBox>
-#include <QtSql/QSqlDatabase>
-#include <QtSql/QSqlQuery.h>
-#include <QtSql/QSqlError>
-
-#include <QtDebug>
-#include <QFileInfo>
-
-#include <QMediaPlayer>
-#include <QMediaPlaylist>
-#include <QMediaService>
-#include <QMediaMetaData>
-
-#include <QWidget>
-#include <QtWidgets>
-
-#include <QFileDialog>
 
 //Datenbank vorbereiten
 bool prepareDB()
@@ -112,17 +95,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(player, &QMediaPlayer::durationChanged, this, &MainWindow::on_durationChanged);
 
     //conect Qlistwidget clicks
-    connect(ui->listWidget_artist, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(on_listWidget_artist_itemClicked(QListWidgetItem*)));
-    connect(ui->listWidget_Album, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(on_listWidget_Album_itemClicked(QListWidgetItem*)));
-    //connect(ui->listWidget_playlist, SIGNAL(itemClicked(QListWidgetItem*)),this ,SLOT(on_listWidget_playlist_itemClicked(QListWidgetItem*)));
+    connect(ui->listWidget_artist, &QListWidget::itemClicked, this, &MainWindow::on_listWidget_artist_itemClicked);
+    connect(ui->listWidget_Album, &QListWidget::itemClicked, this, &MainWindow::on_listWidget_Album_itemClicked);
 
     //connect Qlistwidget double clicks
-
     connect(ui->listWidget_artist, &QListWidget::itemDoubleClicked, this, &MainWindow::on_listWidget_artist_itemDoubleClicked);
     connect(ui->listWidget_Album, &QListWidget::itemDoubleClicked, this, &MainWindow::on_listWidget_album_itemDoubleClicked);
     connect(ui->listWidget_title, &QListWidget::itemDoubleClicked, this, &MainWindow::on_listWidget_title_itemDoubleClicked);
     connect(ui->listWidget_playlist, &QListWidget::itemDoubleClicked, this, &MainWindow::on_listWidget_playlist_itemDoubleClicked);
-
 
 }
 

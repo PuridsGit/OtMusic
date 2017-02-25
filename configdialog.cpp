@@ -2,11 +2,6 @@
 #include "scanner.h"
 #include "ui_configdialog.h"
 
-#include <QtSql>
-#include <QThread>
-#include <QMessageBox>
-#include <QFileDialog>
-
 configdialog::configdialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::configdialog)
@@ -67,8 +62,8 @@ void configdialog::on_pushButton_add_rescan_clicked()
 {
     if(ui->lineEdit->text().length() > 0)
     {
-        QThread* scanThread = new QThread(this);
-        scanner* scanObject = new scanner(this);
+        QThread* scanThread = new QThread();
+        scanner* scanObject = new scanner();
 
         scanObject->moveToThread(scanThread);
         connect(scanThread, &QThread::started, scanObject, &scanner::doWork);

@@ -9,6 +9,24 @@
 #include <QListWidget>
 #include <QListWidgetItem>
 
+#include <QMessageBox>
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery.h>
+#include <QtSql/QSqlError>
+
+#include <QtDebug>
+#include <QFileInfo>
+
+#include <QMediaPlayer>
+#include <QMediaPlaylist>
+#include <QMediaService>
+#include <QMediaMetaData>
+
+#include <QWidget>
+#include <QtWidgets>
+
+#include <QFileDialog>
+
 #include <QDir>
 
 namespace Ui {
@@ -20,7 +38,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
 
@@ -56,8 +74,6 @@ private:
 
     QMediaPlayer* player;
     QMediaPlaylist* playlist;
-
-
 
 };
 
