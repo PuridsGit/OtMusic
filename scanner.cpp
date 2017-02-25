@@ -64,9 +64,6 @@ void scanner::gettagsandadd(QStringList files)
             QString Artist = fileRef.tag()->artist().toCString();
             QString Album = fileRef.tag()->album().toCString();
 
-//            QString qTitle = QString::from;
-//            QString qArtist = QString::fromCString(artist);
-//            QString qAlbum = QString::fromCString(album);
 
 
             QSqlQuery q;
