@@ -33,12 +33,3 @@ DEPENDPATH += $$PWD/../../../Libraries/taglib/include
 win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../../Libraries/taglib/lib/tag.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../../Libraries/taglib/lib/libtag.a
 
-
-
-unix:!macx|win32: LIBS += -L$$PWD/'../../../Program Files (x86)/taglib/lib/' -ltag_c
-
-INCLUDEPATH += $$PWD/'../../../Program Files (x86)/taglib/include'
-DEPENDPATH += $$PWD/'../../../Program Files (x86)/taglib/include'
-
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/'../../../Program Files (x86)/taglib/lib/tag_c.lib'
-else:unix:!macx|win32-g++: PRE_TARGETDEPS += $$PWD/'../../../Program Files (x86)/taglib/lib/libtag_c.a'

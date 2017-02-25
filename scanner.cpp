@@ -1,5 +1,7 @@
 #include "scanner.h"
 
+#define TAGLIB_STATIC
+
 #include <QtSql>
 #include <QMessageBox>
 #include "taglib/fileref.h"

@@ -114,7 +114,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //conect Qlistwidget clicks
     connect(ui->listWidget_artist, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(on_listWidget_artist_itemClicked(QListWidgetItem*)));
     connect(ui->listWidget_Album, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(on_listWidget_Album_itemClicked(QListWidgetItem*)));
-    connect(ui->listWidget_playlist, SIGNAL(itemClicked(QListWidgetItem*)),this ,SLOT(on_listWidget_playlist_itemClicked(QListWidgetItem*)));
+    //connect(ui->listWidget_playlist, SIGNAL(itemClicked(QListWidgetItem*)),this ,SLOT(on_listWidget_playlist_itemClicked(QListWidgetItem*)));
 
     //connect Qlistwidget double clicks
 
@@ -122,11 +122,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->listWidget_Album, &QListWidget::itemDoubleClicked, this, &MainWindow::on_listWidget_album_itemDoubleClicked);
     connect(ui->listWidget_title, &QListWidget::itemDoubleClicked, this, &MainWindow::on_listWidget_title_itemDoubleClicked);
     connect(ui->listWidget_playlist, &QListWidget::itemDoubleClicked, this, &MainWindow::on_listWidget_playlist_itemDoubleClicked);
-
-//    connect(ui->listWidget_artist, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(on_listWidget_artist_itemDoubleClicked(QListWidgetItem*)));
-//    connect(ui->listWidget_Album, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(on_listWidget_Album_itemClicked(QListWidgetItem*)));
-//    connect(ui->listWidget_title, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(on_listWidget_title_itemDoubleClicked(QListWidgetItem*)));
-//    connect(ui->listWidget_playlist, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(on_listWidget_playlist_itemDoubleClicked(QListWidgetItem*)));
 
 
 }
