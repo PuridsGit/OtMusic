@@ -29,6 +29,7 @@
 
 #include <QDir>
 
+
 namespace Ui {
 class MainWindow;
 }
@@ -40,7 +41,6 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
 
 
 private slots:
@@ -55,16 +55,17 @@ private slots:
     void on_ActionOptionenTriggered();
     void on_pushButton_clearplaylist_clicked();
 
-    void on_listWidget_artist_itemClicked(QListWidgetItem *item);
-    void on_listWidget_Album_itemClicked(QListWidgetItem *item);
+    void listWidget_artist_itemClicked(QListWidgetItem *item);
+    void listWidget_Album_itemClicked(QListWidgetItem *item);
 
-    void on_listWidget_artist_itemDoubleClicked(QListWidgetItem *item);
-    void on_listWidget_album_itemDoubleClicked(QListWidgetItem *item);
-    void on_listWidget_title_itemDoubleClicked(QListWidgetItem *item);
-    void on_listWidget_playlist_itemDoubleClicked(QListWidgetItem *item);
+    void listWidget_artist_itemDoubleClicked(QListWidgetItem *item);
+    void listWidget_album_itemDoubleClicked(QListWidgetItem *item);
+    void listWidget_title_itemDoubleClicked(QListWidgetItem *item);
+    void listWidget_playlist_itemDoubleClicked(QListWidgetItem *item);
 
+    void on_pushButton_next_clicked();
 
-
+    void on_pushButton_previous_clicked();
 
 private:
     Ui::MainWindow *ui;

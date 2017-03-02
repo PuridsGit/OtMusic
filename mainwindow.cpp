@@ -1,8 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "configdialog.h"
-#include "about.h"
-
 
 //Datenbank vorbereiten
 bool prepareDB()
@@ -86,6 +84,9 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     ui->listWidget_artist->repaint();
 
+    qDebug() << "Connecting slots";
+
+    //buttons are connected via auto connect by name
 
     //connect Menubar
     connect(ui->actionOptionen, SIGNAL(triggered()), this, SLOT(on_ActionOptionenTriggered()));
@@ -95,15 +96,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(player, &QMediaPlayer::durationChanged, this, &MainWindow::on_durationChanged);
 
     //conect Qlistwidget clicks
-    connect(ui->listWidget_artist, &QListWidget::itemClicked, this, &MainWindow::on_listWidget_artist_itemClicked);
-    connect(ui->listWidget_Album, &QListWidget::itemClicked, this, &MainWindow::on_listWidget_Album_itemClicked);
+    connect(ui->listWidget_artist, &QListWidget::itemClicked, this, &MainWindow::listWidget_artist_itemClicked);
+    connect(ui->listWidget_Album, &QListWidget::itemClicked, this, &MainWindow::listWidget_Album_itemClicked);
 
     //connect Qlistwidget double clicks
-    connect(ui->listWidget_artist, &QListWidget::itemDoubleClicked, this, &MainWindow::on_listWidget_artist_itemDoubleClicked);
-    connect(ui->listWidget_Album, &QListWidget::itemDoubleClicked, this, &MainWindow::on_listWidget_album_itemDoubleClicked);
-    connect(ui->listWidget_title, &QListWidget::itemDoubleClicked, this, &MainWindow::on_listWidget_title_itemDoubleClicked);
-    connect(ui->listWidget_playlist, &QListWidget::itemDoubleClicked, this, &MainWindow::on_listWidget_playlist_itemDoubleClicked);
-
+    connect(ui->listWidget_artist, &QListWidget::itemDoubleClicked, this, &MainWindow::listWidget_artist_itemDoubleClicked);
+    connect(ui->listWidget_Album, &QListWidget::itemDoubleClicked, this, &MainWindow::listWidget_album_itemDoubleClicked);
+    connect(ui->listWidget_title, &QListWidget::itemDoubleClicked, this, &MainWindow::listWidget_title_itemDoubleClicked);
+    connect(ui->listWidget_playlist, &QListWidget::itemDoubleClicked, this, &MainWindow::listWidget_playlist_itemDoubleClicked);
 }
 
 
@@ -113,11 +113,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
 //gathers data from table and compiles it into a list
 QStringList MainWindow::querytoStringlist(QString query)
 {
-    qDebug() << query;
+    //qDebug() << query;
     QSqlQuery q;
     q.prepare(query);
     if(!q.exec())
@@ -211,7 +210,7 @@ void MainWindow::on_ActionOptionenTriggered()
 //to show correct items in coresponding qlistwidget
 
 //when artist qlistwidget is clicked - adds items to album qlistwidget
-void MainWindow::on_listWidget_artist_itemClicked(QListWidgetItem *item)
+void MainWindow::listWidget_artist_itemClicked(QListWidgetItem *item)
 {
     QString itemString = "select distinct ALBUM from Music where ARTIST = '" + item->text() + "'";
     qDebug() << itemString;
@@ -225,7 +224,7 @@ void MainWindow::on_listWidget_artist_itemClicked(QListWidgetItem *item)
 }
 
 //when album qlistwidget is clicked - adds items to title qlistwidget
-void MainWindow::on_listWidget_Album_itemClicked(QListWidgetItem *item)
+void MainWindow::listWidget_Album_itemClicked(QListWidgetItem *item)
 {
     QString itemString = "select TITLE from Music where ALBUM ='" + item->text() + "'";
     qDebug() << itemString;
@@ -242,18 +241,18 @@ void MainWindow::on_listWidget_Album_itemClicked(QListWidgetItem *item)
 //add items to playlist
 
 //double clicked listwidget title
-void MainWindow::on_listWidget_title_itemDoubleClicked(QListWidgetItem *item)
+void MainWindow::listWidget_title_itemDoubleClicked(QListWidgetItem *item)
 {
     QString query ="select URL from Music where TITLE = '" +item->text()+ "'";
     QStringList urls = querytoStringlist(query);
-    QStringList titles = titles << item->text();
-
+    QStringList titles;
+    titles << item->text();
     addtoPlaylist(titles, urls);
 
 }
 
 //double clicked listwidget artist
-void MainWindow::on_listWidget_artist_itemDoubleClicked(QListWidgetItem *item)
+void MainWindow::listWidget_artist_itemDoubleClicked(QListWidgetItem *item)
 {
     QString query ="select URL from Music where ARTIST = '" +item->text()+ "'";
     QStringList urls = querytoStringlist(query);
@@ -264,7 +263,7 @@ void MainWindow::on_listWidget_artist_itemDoubleClicked(QListWidgetItem *item)
 }
 
 //double cliked listwidget album
-void MainWindow::on_listWidget_album_itemDoubleClicked(QListWidgetItem *item)
+void MainWindow::listWidget_album_itemDoubleClicked(QListWidgetItem *item)
 {
     QString query = "select URL from Music where ALBUM = '" +item->text()+ "'";
     QStringList urls = querytoStringlist(query);
@@ -275,11 +274,13 @@ void MainWindow::on_listWidget_album_itemDoubleClicked(QListWidgetItem *item)
 }
 
 //double clicked listwidget playlist
-void MainWindow::on_listWidget_playlist_itemDoubleClicked(QListWidgetItem *item)
+void MainWindow::listWidget_playlist_itemDoubleClicked(QListWidgetItem *item)
 {
     int index = ui->listWidget_playlist->currentRow();
     playlist->setCurrentIndex(index);
     player->play();
+    ui->pushButton_play->setEnabled(false);
+    ui->pushButton_pause->setEnabled(true);
 }
 
 //clear playlist
@@ -290,4 +291,29 @@ void MainWindow::on_pushButton_clearplaylist_clicked()
 }
 
 
+void MainWindow::on_pushButton_next_clicked()
+{
 
+    playlist->next();
+    player->play();
+    ui->pushButton_play->setEnabled(false);
+    ui->pushButton_pause->setEnabled(true);
+
+}
+
+void MainWindow::on_pushButton_previous_clicked()
+{
+    if(player->position() <= 5000)
+    {
+        playlist->previous();
+        player->play();
+        ui->pushButton_play->setEnabled(false);
+        ui->pushButton_pause->setEnabled(true);
+    }
+    else
+    {
+        player->setPosition(0);
+    }
+
+
+}
