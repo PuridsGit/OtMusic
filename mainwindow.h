@@ -42,7 +42,7 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-
+    void clearLists();
 private slots:
 
     void on_pushButton_stop_clicked();
@@ -75,7 +75,6 @@ private:
 
     QMediaPlayer* player;
     QMediaPlaylist* playlist;
-
 };
 
 #endif // MAINWINDOW_H

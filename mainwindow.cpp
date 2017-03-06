@@ -64,14 +64,12 @@ MainWindow::MainWindow(QWidget *parent) :
         this->close();
     }
 
-
-
     player = new QMediaPlayer(this);
     playlist = new QMediaPlaylist(this);
     player->setPlaylist(playlist);
 
 
-    QString query =  "select distinct Artist from Music";
+    QString query =  "select distinct Artist from Music order by Artist COLLATE NOCASE ASC";
 
     qDebug() << query;
 
@@ -156,7 +154,7 @@ void MainWindow::addtoPlaylist(QStringList titles, QStringList URLs)
 void MainWindow::on_pushButton_stop_clicked()
 {
     player->stop();
-    ui->pushButton_pause->setEnabled(false);
+    ui->pushButton_pause->setEnabled(true);
     ui->pushButton_play->setEnabled(true);
 }
 
@@ -164,8 +162,6 @@ void MainWindow::on_pushButton_stop_clicked()
 void MainWindow::on_pushButton_play_clicked()
 {
     player->play();
-    ui->pushButton_play->setEnabled(false);
-    ui->pushButton_pause->setEnabled(true);
 }
 
 
@@ -185,19 +181,49 @@ void MainWindow::on_horizontalSlider_volume_sliderMoved(int position)
 void MainWindow::on_positionChanged(qint64 position)
 {
     ui->horizontalSlider_progress->setValue(position);
+    ui->label_time_past->setText(QString::number(position));
 }
 
 void MainWindow::on_durationChanged(qint64 position)
 {
+    //set max for progressbar
     ui->horizontalSlider_progress->setMaximum(position);
+    //set time lable
+    ui->label_time_max->setText(QString::number(position));
+
+    //sets text lable whats currently playing
+    QUrl url = player->currentMedia().canonicalUrl();
+    QString stringUrl = url.toString();
+    stringUrl.replace("//","/");
+    stringUrl.replace("'","''");
+    stringUrl.remove(0,7);
+
+    qDebug() << "Stringurl: " << stringUrl;
+
+    QSqlQuery q;
+    QString query = "select Artist, Album, Title from Music where Url = '" + stringUrl + "'";
+    q.prepare(query);
+    qDebug() << query;
+
+    if(!q.exec())
+    {
+        qDebug() << q.lastError().text();
+    }
+    else
+    {
+        q.first();
+        QString currentlyPlaying = q.value(0).toString();
+        currentlyPlaying.append("  -  " +q.value(1).toString() + "  -  " +q.value(2).toString());
+
+        ui->label_currently_playing->setText(currentlyPlaying);
+    }
+
 }
 
 //push button pause
 void MainWindow::on_pushButton_pause_clicked()
 {
     player->pause();
-    ui->pushButton_play->setEnabled(true);
-    ui->pushButton_pause->setEnabled(false);
 }
 
 void MainWindow::on_ActionOptionenTriggered()
@@ -215,12 +241,14 @@ void MainWindow::listWidget_artist_itemClicked(QListWidgetItem *item)
     QString itemString = "select distinct ALBUM from Music where ARTIST = '" + item->text() + "'";
     qDebug() << itemString;
 
-
     QStringList alist = querytoStringlist(itemString);
-
     ui->listWidget_Album->clear();
-
     ui->listWidget_Album->addItems(alist);
+
+    itemString = "select TITLE from Music where ARTIST ='" + item->text() + "'";
+    alist = querytoStringlist(itemString);
+    ui->listWidget_title->clear();
+    ui->listWidget_title->addItems(alist);
 }
 
 //when album qlistwidget is clicked - adds items to title qlistwidget
@@ -279,7 +307,7 @@ void MainWindow::listWidget_playlist_itemDoubleClicked(QListWidgetItem *item)
     int index = ui->listWidget_playlist->currentRow();
     playlist->setCurrentIndex(index);
     player->play();
-    ui->pushButton_play->setEnabled(false);
+    ui->pushButton_play->setEnabled(true);
     ui->pushButton_pause->setEnabled(true);
 }
 
@@ -290,30 +318,38 @@ void MainWindow::on_pushButton_clearplaylist_clicked()
     playlist->clear();
 }
 
-
+//click button next advances the playlist
 void MainWindow::on_pushButton_next_clicked()
 {
-
     playlist->next();
     player->play();
-    ui->pushButton_play->setEnabled(false);
+    ui->pushButton_play->setEnabled(true);
     ui->pushButton_pause->setEnabled(true);
-
 }
 
+
+//click button prev sets the playlist back 1
 void MainWindow::on_pushButton_previous_clicked()
 {
     if(player->position() <= 5000)
     {
         playlist->previous();
         player->play();
-        ui->pushButton_play->setEnabled(false);
+        ui->pushButton_play->setEnabled(true);
         ui->pushButton_pause->setEnabled(true);
     }
     else
     {
         player->setPosition(0);
     }
+}
 
-
+//clears all lists gets called when db is deleted
+void MainWindow::clearLists()
+{
+    ui->listWidget_Album->clear();
+    ui->listWidget_artist->clear();
+    ui->listWidget_playlist->clear();
+    ui->listWidget_title->clear();
+    playlist->clear();
 }

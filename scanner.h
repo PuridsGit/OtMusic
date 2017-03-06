@@ -2,7 +2,7 @@
 #define SCANNER_H
 
 #include <QObject>
-
+#include <QVector>
 class scanner : public QObject
 {
     Q_OBJECT
@@ -12,6 +12,8 @@ public:
 private:
     void gettagsandadd(QStringList files);
 
+    QVector <QVector<QString>> stringVector;
+
 signals:
     void updateProgressbar(int i);
     void switchProgressbar();
@@ -19,6 +21,7 @@ signals:
 public slots:
 
     void doWork();
+    void quitWorking();
 };
 
 #endif // SCANNER_H

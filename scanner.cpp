@@ -18,7 +18,6 @@ void scanner::doWork()
 
     QSqlQuery q;
     QString chosendir;
-    QStringList mp3;
     QStringList files;
 
     q.prepare("select Dir from Dir where id =1");
@@ -29,7 +28,7 @@ void scanner::doWork()
 
     //turn on progressbar and set it to 15%
     emit switchProgressbar();
-    emit updateProgressbar(15);
+    emit updateProgressbar(5);
 
     //scann directory for all files
     QDirIterator it(chosendir, QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
@@ -38,7 +37,7 @@ void scanner::doWork()
         files << it.next();
     }
 
-    emit updateProgressbar(45);
+    emit updateProgressbar(15);
 
     gettagsandadd(files);
 
@@ -50,8 +49,8 @@ void scanner::gettagsandadd(QStringList files)
     int length = files.length();
 
     //progressbar variables
-    int progressbarCurrent = 45;
-    int progressbarHelper = length/50;
+    int progressbarCurrent = 15;
+    int progressbarHelper = length/70;
     int helper = 0;
 
     //actually adding to database
@@ -60,24 +59,29 @@ void scanner::gettagsandadd(QStringList files)
         if(files.at(i).endsWith("mp3") || files.at(i).endsWith("wav") || files.at(i).endsWith("flac"))
         {
             TagLib::FileRef fileRef(files.at(i).toStdString().data());
-            QString Title = fileRef.tag()->title().toCString();
-            QString Artist = fileRef.tag()->artist().toCString();
-            QString Album = fileRef.tag()->album().toCString();
-
-
-
-            QSqlQuery q;
-
-            q.prepare("insert or replace into Music(FID, URL, TITLE, ARTIST, ALBUM) values(:FID, :URL, :TITLE, :ARTIST, :ALBUM)");
-            q.bindValue(":FID", i);
-            q.bindValue(":URL", files.at(i));
-            q.bindValue(":TITLE", Title);
-            q.bindValue(":ARTIST", Artist);
-            q.bindValue(":ALBUM", Album);
-            if(!q.exec())
+            if (fileRef.isNull() == false)
             {
-                qDebug() << q.lastError().text();
+                QString Title = fileRef.tag()->title().toCString();
+                QString Artist = fileRef.tag()->artist().toCString();
+                QString Album = fileRef.tag()->album().toCString();
+
+                QSqlQuery q;
+
+                q.prepare("insert or replace into Music(FID, URL, TITLE, ARTIST, ALBUM) values(:FID, :URL, :TITLE, :ARTIST, :ALBUM)");
+                q.bindValue(":FID", i);
+                q.bindValue(":URL", files.at(i));
+                q.bindValue(":TITLE", Title);
+                q.bindValue(":ARTIST", Artist);
+                q.bindValue(":ALBUM", Album);
+                if(!q.exec())
+                {
+                    qDebug() << q.lastError().text();
+                }
             }
+
+
+
+
 
             //progressbar update
             helper++;
@@ -90,6 +94,9 @@ void scanner::gettagsandadd(QStringList files)
         }
     }
 
+
+
+
     //turn off progressbar
     emit switchProgressbar();
 
@@ -99,4 +106,9 @@ void scanner::gettagsandadd(QStringList files)
     messageBox.exec();
 
 
+}
+
+void scanner::quitWorking()
+{
+    emit switchProgressbar();
 }

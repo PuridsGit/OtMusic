@@ -1,6 +1,7 @@
 #include "configdialog.h"
 #include "scanner.h"
 #include "ui_configdialog.h"
+#include "mainwindow.h"
 
 configdialog::configdialog(QWidget *parent) :
     QDialog(parent),
@@ -8,6 +9,7 @@ configdialog::configdialog(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->progressBar->setVisible(false);
+    ui->pushButton_cancel->setVisible(false);
 
     //connect
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(on_buttonBox_accepted()));
@@ -71,6 +73,8 @@ void configdialog::on_pushButton_add_rescan_clicked()
         connect(scanThread, &QThread::finished, scanObject, &QObject::deleteLater);
         connect(scanObject, &scanner::updateProgressbar, this, &configdialog::on_progressBarupdate);
         connect(scanObject, &scanner::switchProgressbar, this, &configdialog::on_switchProgressbar);
+        connect(this, &configdialog::emitquit, scanThread, &QThread::quit);
+
 
         scanThread->start();
     }
@@ -92,10 +96,14 @@ void configdialog::on_switchProgressbar()
     if(ui->progressBar->isVisible())
     {
         ui->progressBar->setVisible(false);
+        ui->pushButton_cancel->setVisible(false);
+        ui->pushButton_cancel->setEnabled(false);
     }
     else
     {
         ui->progressBar->setVisible(true);
+        ui->pushButton_cancel->setVisible(true);
+        ui->pushButton_cancel->setEnabled(true);
     }
 }
 
@@ -109,4 +117,24 @@ void configdialog::on_buttonBox_accepted()
 void configdialog::on_buttonBox_rejected()
 {
     this->close();
+}
+
+//deletes Database entries
+void configdialog::on_pushButton_delete_clicked()
+{
+    QSqlQuery q;
+    QString query = "DELETE FROM Music WHERE FID > -1";
+    q.prepare(query);
+    if(!q.exec())
+    {
+        qDebug() << q.lastError().text();
+    }
+    MainWindow m;
+    m.clearLists();
+}
+
+//cancels the scan for new music
+void configdialog::on_pushButton_cancel_clicked()
+{
+    emit emitquit();
 }

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>932</width>
-    <height>720</height>
+    <height>715</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -77,7 +77,7 @@
         <item>
          <widget class="QPushButton" name="pushButton_pause">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Pause</string>
@@ -182,7 +182,7 @@
         <item row="0" column="1">
          <widget class="QGroupBox" name="playlist">
           <property name="title">
-           <string>Now Playing</string>
+           <string>Playlist</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>

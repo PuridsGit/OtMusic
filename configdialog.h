@@ -35,6 +35,13 @@ private slots:
 
     void on_buttonBox_rejected();
 
+    void on_pushButton_delete_clicked();
+    void on_pushButton_cancel_clicked();
+
+signals:
+
+    void emitquit();
+
 private:
     Ui::configdialog *ui;
 
